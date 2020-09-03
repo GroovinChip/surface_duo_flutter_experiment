@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Surface Duo Test 2'),
     );
   }
 }
@@ -29,19 +29,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String _selectedItem = 'No selection yet.';
 
   /// Surface Duo stuff
   bool _isDualScreenDevice = false;
   bool _isAppSpanned = false;
   double _hingeAngle = 180.0;
   int _hingeSize = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   void initState() {
@@ -83,11 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
     );
   }
 
@@ -95,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!_isDualScreenDevice || (_isDualScreenDevice && !_isAppSpanned)) {
       // We are not on a dual-screen device or
       // we are but we are not spanned
-      return _buildBody();
+      return _buildList();
     } else {
       // We are on a dual-screen device and we are spanned
       if (MediaQuery.of(context).orientation == Orientation.portrait) {
@@ -106,12 +95,14 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Flexible(
               flex: 1,
-              child: _buildBody(),
+              child: _buildList(),
             ),
             SizedBox(height: _hingeSize.toDouble()),
             Flexible(
               flex: 1,
-              child: Center(child: FlutterLogo(size: 200.0)),
+              child: Center(
+                child: _buildDetails(),
+              ),
             ),
           ],
         );
@@ -120,12 +111,14 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Flexible(
               flex: 1,
-              child: _buildBody(),
+              child: _buildList(),
             ),
             SizedBox(width: _hingeSize.toDouble()),
             Flexible(
               flex: 1,
-              child: Center(child: FlutterLogo(size: 200.0)),
+              child: Center(
+                child: _buildDetails(),
+              ),
             ),
           ],
         );
@@ -133,20 +126,42 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget _buildBody() {
+  Widget _buildList() {
+    return ListView.builder(
+      itemCount: 10,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text('List item #${index + 1}'),
+          onTap: () {
+            /// Currently, if the user selects an item in single screen mode,
+            /// and then spans the app across both screens, we do not actually
+            /// move into a spanned mode where we have distinct content on each
+            /// screen. todo: figure out how to return to the correct spanned mode.
+            if (!_isDualScreenDevice ||
+                (_isDualScreenDevice && !_isAppSpanned)) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) {
+                    return Scaffold(
+                      appBar: AppBar(),
+                      body: Center(
+                        child: Text('Item #${index + 1}'),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
+            setState(() => _selectedItem = 'Item #${index + 1}');
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDetails() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'You have pushed the button this many times:',
-          ),
-          Text(
-            '$_counter',
-            style: Theme.of(context).textTheme.headline4,
-          ),
-        ],
-      ),
+      child: Text(_selectedItem),
     );
   }
 }
