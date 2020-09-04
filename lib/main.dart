@@ -20,11 +20,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
-      builder: (context, value, child) {
+      builder: (BuildContext context, AppState appState, Widget child) {
         return TwoPageLayout(
           child: MainPage(),
           secondChild: DetailView(
-            itemNumber: value.listItem,
+            itemNumber: appState.listItem,
           ),
         );
       },
@@ -32,6 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// In single screen mode this will be the first screen the user sees. In spanned
+/// mode, this screen will be shown on the left.
 class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
