@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:surface_duo_test/app_state.dart';
-import 'package:surface_duo_test/detail_view.dart';
-import 'package:surface_duo_test/item_list.dart';
 import 'package:multi_screen_layout/multi_screen_layout.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppState(),
-      child: MaterialApp(
-        home: MyApp(),
-      ),
+    MaterialApp(
+      home: MyApp(),
     ),
   );
 }
@@ -19,15 +12,9 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (BuildContext context, AppState appState, Widget child) {
-        return TwoPageLayout(
-          child: MainPage(),
-          secondChild: DetailView(
-            itemNumber: appState.listItem,
-          ),
-        );
-      },
+    return TwoPageLayout(
+      child: MainPage(),
+      secondChild: SecondPage(),
     );
   }
 }
@@ -37,11 +24,49 @@ class MyApp extends StatelessWidget {
 class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Item List'),
-      ),
-      body: ItemList(),
+    return MultiScreenInfo(
+      builder: (MultiScreenLayoutInfoModel info) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Dialog Experiment'),
+          ),
+          body: Center(
+            child: RaisedButton(
+              child: Text('Open Dialog'),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => Stack(
+                  children: [
+                    Positioned(
+                      left: 100,
+                      top: MediaQuery.of(context).size.height / 3,
+                      child: AlertDialog(
+                        title: Text(!info.isSpanned
+                            ? 'This is a dialog'
+                            : 'This is a dialog on the left screen'),
+                        actions: [
+                          FlatButton(
+                            child: Text('OK'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
+  }
+}
+
+/// In spanned mode, this screen will be shown on the right.
+class SecondPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
   }
 }
