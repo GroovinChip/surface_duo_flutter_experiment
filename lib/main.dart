@@ -12,61 +12,87 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TwoPageLayout(
-      child: MainPage(),
-      secondChild: SecondPage(),
+    return MasterDetailLayoutExample();
+  }
+}
+
+class MasterDetailLayoutExample extends StatefulWidget {
+  @override
+  _MasterDetailLayoutExampleState createState() =>
+      _MasterDetailLayoutExampleState();
+}
+
+class _MasterDetailLayoutExampleState extends State<MasterDetailLayoutExample> {
+  int selectedItem;
+
+  @override
+  Widget build(BuildContext context) {
+    return MasterDetailLayout(
+      master: Master(
+        onItemSelected: (int selected) {
+          setState(() => selectedItem = selected);
+        },
+      ),
+      detail: Detail(itemNumber: selectedItem),
+      isSelected: selectedItem != null,
     );
   }
 }
 
-/// In single screen mode this will be the first screen the user sees. In spanned
-/// mode, this screen will be shown on the left.
-class MainPage extends StatelessWidget {
+class Master extends StatelessWidget {
+  const Master({
+    Key key,
+    @required this.onItemSelected,
+  }) : super(key: key);
+
+  final void Function(int) onItemSelected;
+
   @override
   Widget build(BuildContext context) {
-    return MultiScreenInfo(
-      builder: (MultiScreenLayoutInfoModel info) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Dialog Experiment'),
-          ),
-          body: Center(
-            child: RaisedButton(
-              child: Text('Open Dialog'),
-              onPressed: () => showDialog(
-                context: context,
-                builder: (_) => Stack(
-                  children: [
-                    Positioned(
-                      left: 100,
-                      top: MediaQuery.of(context).size.height / 3,
-                      child: AlertDialog(
-                        title: Text(!info.isSpanned
-                            ? 'This is a dialog'
-                            : 'This is a dialog on the left screen'),
-                        actions: [
-                          FlatButton(
-                            child: Text('OK'),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Item List'),
+        actions: [
+          FlatButton(
+            child: Text(
+              'CLEAR SELECTION',
+              style: TextStyle(color: Colors.white),
             ),
+            onPressed: () => onItemSelected(null),
           ),
-        );
-      },
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            title: Text(index.toString()),
+            trailing: Icon(Icons.chevron_right),
+            onTap: () => onItemSelected(index),
+          );
+        },
+      ),
     );
   }
 }
 
-/// In spanned mode, this screen will be shown on the right.
-class SecondPage extends StatelessWidget {
+class Detail extends StatelessWidget {
+  const Detail({
+    Key key,
+    @required this.itemNumber,
+  }) : super(key: key);
+
+  final int itemNumber;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Detail View'),
+      ),
+      body: Center(
+        child: Text(itemNumber == null ? 'No Selection' : 'Item #$itemNumber'),
+      ),
+    );
   }
 }
